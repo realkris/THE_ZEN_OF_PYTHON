@@ -1,0 +1,1138 @@
+"""
+TITLE:    PEP 8 -- Style Guide for Python Code
+AUTHOR: 	Guido van Rossum <guido at python.org>, 
+          Barry Warsaw <barry at python.org>, 
+          Nick Coghlan <ncoghlan at gmail.com>
+Post:     05-Jul-2001, 01-Aug-2013
+Source:   https://www.python.org/dev/peps/pep-0008/
+
+Translate:
+  realkris Zhang <ZPRC@Hotmail.com>
+  Date:     16-Dec-2020
+  Version:  0.1
+  Annotations:
+    这是一篇对PEP-8官方指南的翻译，译者在日常工作中频繁的使用Python，并在近日通过了99分的托福（折IELTS 7.0）。
+    为了提高代码的易读性，提高代码工程性和减少垃圾，在Sherk Fung的影响下决定仔细阅读PEP-8。并在阅读过程中顺便编写了这份译文，为了深入理解，部分节段可能包含对其他文档的引用。
+    我使用标准的文本文档编写了这篇文档，而不是使用MarkDown或LaTeX。由于我希望这篇文章可以在任何兼容UTF-8的机器上轻松阅读，为此我在不断地改进排版。
+    因水平有限，细小的谬误时有可能发生。如果你发现了其中的改进，请不要吝啬通过上面的邮件地址联系我。非常感谢。
+
+  ***欢迎转载，注明出处。***
+"""
+
+* Introduction                                              介绍
+* A Foolish Consistency is the Hobgoblin of Little Minds    懂得何时忽略这篇指南而非永远愚蠢地遵守
+* Code Lay-out                                              代码布局
+  - Indentation                                               代码缩进
+  - Tabs or Spaces?                                           使用制表符('\t')还是空格？
+  - Maximum Line Length                                       一行代码最大的长度
+  - Should a Line Break Before or After a Binary Operator?    换行应该在二元运算符的前还是后？
+  - Blank Lines                                               空行
+  - Source File Encoding                                      源文件的编码
+  - Imports                                                   模块的导入
+  - Module Level Dunder Names                                 如何使用dunders(形如__*__)？
+* String Quotes                                             字符串中的引号
+* Whitespace in Expressions and Statements                  表达式和语句中的空格
+  - Pet Peeves                                                一些习惯的令人厌恶的小毛病
+  - Other Recommendations                                     本章其他的建议
+* When to Use Trailing Commas                               什么时候在行尾使用逗号
+* Comments                                                  注释
+  - Block Comments                                            块注释（通常注释）
+  - Inline Comments                                           内联注释
+  - Documentation Strings                                     文档字符串
+* Naming Conventions                                        命名方法
+  - Overriding Principle                                      首要的命名原则
+  - Descriptive: Naming Styles                                描述型的命名样式
+  - Prescriptive: Naming Conventions                          惯例上的命名约定
+    - Names to Avoid                                            避免使用的名称
+    - ASCII Compatibility                                       ASCII 兼容性
+    - Package and Module Names                                  包和模块名
+    - Class Names                                               类名
+    - Type Variable Names                                       类型变量名
+    - Exception Names                                           “异常”名
+    - Global Variable Names                                     全局变量名
+    - Function and Variable Names                               函数和变量名
+    - Function and Method Arguments                             函数和方法的参数名
+    - Method Names and Instance Variables                       方法名和变量实例
+    - Constants                                                 常数
+    - Designing for Inheritance                                 继承设计的命名方法
+  - Public and Internal Interfaces                            公共和内部接口名
+* Programming Recommendations                               编程建议
+  - Function Annotations                                      函数注释
+  - Variable Annotations                                      可变注释
+* References                                                引用
+* Copyright                                                 版权
+
+=========================================================================================
+
+
+-------------------
+* Introduction 简介
+
+本文档给出了Python代码的编程约定，该约定包含了主Python发行版中的所有标准库。
+
+请参阅随附的信息性PEP，其中描述了Python[1] 的C实现中的C代码的样式准则。
+
+本文档和PEP 257是从Guido最初的Python样式指南文章中改编而来，并对Barry的样式指南[2] 作了一些补充。
+
+该样式指南会随着时间的流逝，新增的约定不断提出而不断推陈出新，然而过去的约定会由于语言本身的更改而变得过时。
+
+许多项目都有自己的编码风格准则。如有任何冲突，此类项目特定的指南优先于本指南。
+
+
+
+
+-------------------
+* A Foolish Consistency is the Hobgoblin of Little Minds  懂得何时忽略这篇指南而非永远愚蠢地遵守
+
+Guido的主要见解之一是代码被读取的次数远远多于其被编写的次数。所以这篇指南旨在提高代码的可读性，并使其在各种Python代码中保持一致。
+
+正如PEP 20所说，“可读性至关重要”。
+
+一篇样式指南是关于一致性的约定。遵守该样式指南保持一致性很重要。遵守项目内的一致性更为重要。遵守一个模块或功能内的一致性是最重要的。
+
+但是，要知道什么时候 不 一 致 --有时此样式指南的建议就不适用。当你编程不知所措的时候，请通过寻找查看其他的例子，确定最合适的方法。
+
+哦，对！不要犹豫是否寻求他人帮助，问就完了！
+
+特别是：不要为了遵守本PEP而破坏向后兼容性！
+
+其他一些忽略样式准则的充分理由：
+
+应用指南时，即使对于那些习惯阅读遵循此PEP的代码的人来说，也会使代码的可读性降低。
+与周围的代码（也可能出于历史原因）相一致（可能是出于历史原因），尽管这也是清理别人的垃圾（真正的XP风格）的机会。
+由于所讨论的代码早于准则的引入，因此没有其他理由修改该代码。
+当代码需要与不支持样式指南建议的功能的Python的较旧版本兼容时。
+
+
+
+
+
+
+-------------------
+* Code Lay-out  代码布局
+  - 缩进
+    每个缩进级别使用4个空格。（不要学习本文本的样式，这是为了便于单屏阅读而非频繁搓动横向滚动条）
+    在括号，方括号和花括号内换行时，需要使Python的隐式线垂直对齐括号元素，或使用悬挂式缩进 [7]。
+    使用悬挂式缩进时，应考虑以下几点：第一行不应包含任何参数; 并且应进一步缩进以将其清楚地标识为延续行。
+    -------------------------------------------------------------------------------------------
+    |# Correct:                                                                               |
+    |                                                                                         |
+    |# 与括号的开始对齐                                                                         |
+    |foo = long_function_name(var_one, var_two,                                               |
+    |                         var_three, var_four)                                            |
+    |                                                                                         |
+    |# 添加4个额外的空格（加一级缩进）以区分参数和其余参数。                                           |
+    |def long_function_name(                                                                  |
+    |        var_one, var_two, var_three,                                                     |
+    |        var_four):                                                                       |
+    |    print(var_one)                                                                       |
+    |                                                                                         |
+    |# 悬挂缩进时，需要加一层，以与其他语句区分开                                                    |
+    |foo = long_function_name(                                                                |
+    |    var_one, var_two,                                                                    |
+    |    var_three, var_four)                                                                 |
+    |  -     -     -     -     -     -     -     -                                            |
+    |# Wrong:                                                                                 |
+    |                                                                                         |
+    |# 由于没有使用垂直对其，第一行的参数将被禁止                                                    |
+    |foo = long_function_name(var_one, var_two,                                               |
+    |    var_three, var_four)                                                                 |
+    |                                                                                         |
+    |# 由于缩进无法区分，因此需要进一步缩进。                                                       |
+    |def long_function_name(                                                                  |
+    |    var_one, var_two, var_three,                                                         |
+    |    var_four):                                                                           |
+    |    print(var_one)                                                                       |
+    -------------------------------------------------------------------------------------------
+    对于使用悬挂缩进的连续行，4空格规则不一定需要遵守。比如：
+    ________________________________________
+    ＃悬挂的缩进"可以"缩进到4个空格以外的其他空格。
+    foo = long_function_name（
+      var_one，var_two，
+      var_three，var_four）
+    ________________________________________
+
+    如果if-语句的条件部分足够长，可以要求将其写成多行，值得注意的是，当if中含有两个或以上条件，后续行可能会自然的产生4个空格缩进。
+    这可能与嵌套在if语句内的缩进代码集产生视觉冲突，因为该缩进代码自然也将缩进4个空格。
+    对于如何（或是否）在视觉上进一步将这些条件行与if语句内的嵌套条件区分开来，PEP没有做任何明确的表述。
+    在这种情况下，可接受的修改选项包括但不限于：
+    ________________________________________
+    # 没有缩进-导致视觉冲突的情况
+    if (this_is_one_thing and
+        that_is_another_thing):
+        do_something()
+
+    # 加了一行注释，使if的条件与do_something更好区分一些
+    # supporting syntax highlighting.
+    if (this_is_one_thing and
+        that_is_another_thing):
+        # BLABLABLABLABLABLABLABLABLABLABLABLABLABLABLABLABLABLABLABLA
+        do_something()
+
+    # 在条件延续行上添加一些额外的缩进
+    if (this_is_one_thing
+            and that_is_another_thing):
+        do_something()
+    ________________________________________
+
+    另请参见下面有关在二元运算符之前还是之后进行中断（换行缩进）的讨论。（本章第四节）
+
+    多行构造的右花括号/中括号/小括号可以在列表最后一行的第一个非空白字符下对齐，如下所示：
+    ________________________________________
+    my_list = [
+        1, 2, 3,
+        4, 5, 6,
+        ]
+    result = some_function_that_takes_arguments(
+        'a', 'b', 'c',
+        'd', 'e', 'f',
+        )
+    ________________________________________
+    或者可以将其排列在开始多行构造的行的第一个字符下，例如：
+    ________________________________________
+    my_list = [
+      1 2 3
+      4 5 6
+    ]
+    result= some_function_that_takes_arguments（
+        'a'，'b'，'c'，
+        'd'，'e'，'f'，
+    ）
+    ________________________________________
+
+
+  - 使用制表符('\t')还是空格？
+
+    空格是首选的缩进方法。
+
+    制表符应仅用于与已经用制表符缩进的代码保持一致。
+
+    Python 3不允许混合使用制表符和空格进行缩进,所以缩进制表符和空格混合在一起的Python 2代码应转换为仅使用空格。
+
+    当使用-t选项调用Python 2命令行解释器时，它会发出有关非法混合使用制表符和空格的代码的警告。
+    当使用-tt时，这些警告变为错误。
+    强烈建议您使用这些选项！
+
+
+  - 一行代码最大的长度
+    任何行都被限制为最多79个字符。
+
+    为了使较长的文本块具有较少的结构限制（文档字符串或注释），行长应限制为72个字符。
+
+    通过限制所需的编辑器窗口宽度，可以并排打开多个文件，并且在使用在相邻列中显示两个版本的代码查看工具时，效果很好。
+
+    大多数工具中的默认换行会破坏代码的视觉结构，使其更难以理解。
+      代码长度限制是为了避免在窗口宽度设置为80的编辑器中进行换行，即使在换行时该工具在最后一列中放置了标志符号。
+    # 某些基于Web的工具可能根本不提供动态换行。
+
+    一些团队强烈喜欢更长的线长。
+      对于专门或主要由可以就此问题达成协议的团队维护的代码，可以将行长度限制增加到最多99个字符，前提是注释和文档字符串仍以72个字符包装。
+
+    Python标准库是保守的，需要将每行字数限制为79个字符（文档字符串/注释数限制为72个）。
+
+    换行的首选方法是在括号，方括号和花括号内使用Python的隐含行连续性。通过将表达式包装在括号中，可以将长行分成多行。不鼓励使用反斜杠进行行连续。
+
+    不过有时反斜杠仍然合适。例如，“with-” 语句不能使用隐式连续，因此可以使用反斜杠：
+    ________________________________________
+    with open('/path/to/some/file/you/want/to/read') as file_1, \
+        open('/path/to/some/file/being/written', 'w') as file_2:
+        file_2.write(file_1.read())
+    ________________________________________
+    
+    （有关对带有with语句的多行语句的进一步思考，请参见前面关于多行if语句的讨论。）
+
+    另一种此类情况是使用assert语句, 确保适当缩进续行。
+
+
+  - 换行应该在二元运算符的前还是后？
+    几十年来，以往推荐的样式一直是在二元运算符之后换行。但这种写法会以两种方式损害可读性：
+    
+    1.  运算符趋于分散在屏幕上的不同列上。  2. 每个运算符都从其操作数移至上一行。
+    
+    在这里，眼睛必须做额外的工作才能分辨出添加了哪些项目和减去了哪些项目，如：
+    ________________________________________
+    # Wrong:
+    # 运算符的位置远离其操作数
+    income = (gross_wages +
+              taxable_interest +
+              (dividends - qualified_dividends) -
+              ira_deduction -
+              student_loan_interest)
+    ________________________________________
+
+    为了解决此可读性问题，数学家和他们的出版社遵循与上面的恰恰相反的样式。
+    Donald Knuth在他的“ Computers and Typesetting ”系列中解释了传统的规则(上问提的错误样式）：
+    “尽管行中的公式总是在二元运算和联系之后中断，显示的公式总是在二元运算和关系之前中断” [3]。
+    因此，遵循数学的传统通常会使代码更具可读性，如：
+    ________________________________________
+    # Correct:
+    # easy to match operators with operands
+    income = (gross_wages
+              + taxable_interest
+              + (dividends - qualified_dividends)
+              - ira_deduction
+              - student_loan_interest)
+    ________________________________________
+    在Python代码中，只要样式约定在本项目中具有一致性，就可以在二元运算符之前或之后中断。对于新代码，建议使用Knuth的样式。
+
+  
+  - 空行
+    用两个空行包围顶级函数和类定义。
+
+    类内的方法定义由单个空白行包围。
+
+    多余的空白行可以（分别）用于分隔相关功能组。一堆相关的单行代码（例如，一组虚拟实现 见本章最后一节）之间可以省略空白行。
+
+    在函数中使用空白行以分隔逻辑部分。
+
+    Python接受control-L（即^ L）换页字符作为空格；许多工具将这些字符视为页面分隔符，因此您可以使用它们来分隔您的文件中不同部分的页面。
+    
+    请注意，某些编辑器和基于Web的代码查看器可能不会将control-L识别为换页，取而代之地在其位置显示另一个标志符号。
+  
+  
+  - 源文件的编码
+    核心Python发行版中的代码应始终使用UTF-8（或Python 2中的ASCII）。
+
+    使用ASCII（在Python 2中）或UTF-8（在Python 3中）的文件不需要包含编码声明。
+
+    在标准库中，非默认编码仅应用于测试目的，或者在注释或文档字符串需要提及包含非ASCII字符的作者姓名时；
+      否则，使用\ x， \ u，\U 或 \N 转义是在字符串文字中包含非ASCII数据的首选方法。
+
+    对于Python 3.0及更高版本，标准库规定了以下策略（请参阅PEP 3131）：
+    Python标准库中的所有标识符务必使用纯ASCII标识符，并且在可行的情况下应使用英文单词（在许多情况下，缩写和技术使用的术语不是英语）。
+    此外，字符串文字和注释也必须使用ASCII。唯一的例外是
+    （a）测试非ASCII功能的测试用例。
+    （b）作者的姓名。名称不基于拉丁字母（latin-1，ISO / IEC 8859-1字符集）的作者必须在此字符集中提供其姓名的音译。
+
+    鼓励具有全球受众的开源项目采用类似的编码政策。
+
+
+  - 模块的导入
+    import 通常遵循一行一个的原则：
+    ________________________________________
+    # Correct:
+    import os
+    import sys
+
+    # Wrong:
+    import sys, os
+    ________________________________________
+    
+    
+    不过，这样也是OK的：
+    ________________________________________
+    # Correct:
+    from subprocess import Popen, PIPE
+    ________________________________________
+
+    import总是放在文件的顶部，紧随任何模块注释和文档字符串之后，同时在全局变量和常量之前。
+    
+    导入应按以下顺序分组：
+      1. 标准库导入。
+
+      2. 相关第三方库。
+
+      3. 本地应用/库的某个具体模块/方法的导入。
+
+    您应该在每组导入之间放置一个空白行。
+
+    推荐在导入时给出明确的指向，这样通常更具可读性，并且通常表现更好。
+      因为如果导入系统配置不正确（例如，程序包中的目录最终位于sys.path时），至少会提供更好的错误消息：
+    ________________________________________
+    import mypkg.sibling
+    from mypkg import sibling
+    from mypkg.sibling import example
+    ________________________________________
+    
+    显式地相对导入是绝对导入的一种可接受的替代方法，特别是在处理复杂的包装布局时，使用绝对导入会导致不必要地冗长：
+    ________________________________________
+    import mypkg.sibling
+    from mypkg import sibling
+    from mypkg.sibling import example
+    ________________________________________
+
+    标准库代码应避免复杂的程序包布局，并始终使用绝对导入。
+
+    绝对 不 要 使用隐式相对导入，并且在Python 3中已将其删除。
+
+    从包含类的模块中导入类时，通常可以这样拼写：
+    ________________________________________
+    from myclass import MyClass
+    from foo.bar.yourclass import YourClass
+    ________________________________________
+
+    如果此拼写引起本地名称冲突，则应明确拼写它们：
+    ________________________________________
+    import myclass
+    import foo.bar.yourclass
+    在程序下文中使用"myclass.MyClass" 和 "foo.bar.yourclass.YourClass".
+    ________________________________________
+
+    应避免使用通配符导入（来自<module> import *），因为通配符使名称空间中不清楚存在哪些名称，这会混淆读取器和许多自动化工具。
+    通配符导入有一个“防御式”的合理用例，是将内部接口重新发布为公共API的一部分
+      （例如，使用另外的加速器模块中的定义覆盖接口的纯Python实现，同时具体哪些被覆盖的定义是事先未知的）。
+
+    以这种方式重新发布名称时，以下有关公共和内部接口的准则仍然适用。
+
+    - 如何使用dunders(形如__*__)？
+    模块级“dunders”（即名称前后有两个下划线）如__all__，__author__，__version__等等。
+      他们通常被放置在文档字符串之后，但在任何导入语句（除了__future__）之前。
+    Python强制要求future-import必须被写在除文档字符串以外的任何其他代码之前：
+    ________________________________________
+    """This is the example module.
+
+    This module does stuff.
+    """
+
+    from __future__ import barry_as_FLUFL
+
+    __all__ = ['a', 'b', 'c']
+    __version__ = '0.1'
+    __author__ = 'Cardinal Biggles'
+
+    import os
+    import sys
+    ________________________________________
+
+
+
+
+------------------
+* String Quotes  字符串中的引号
+  在Python中，单引号字符串和双引号字符串是相同的。本PEP对此不做任何建议。选择一条规则并坚持下去。
+  但是，当字符串包含单引号或双引号字符时，请使用另一个以避免在字符串中使用反斜杠。这样可以提高可读性。
+
+  对于三引号字符串，请始终使用双引号字符以与PEP 257中的docstring约定一致。
+
+
+
+
+------------------
+* Whitespace in Expressions and Statements  表达式和语句中的空格
+  - 一些习惯的令人厌恶的小毛病
+    在以下情况下，请避免使用多余的空格：
+      紧靠在括号，中括号或大括号内：
+      ________________________________________
+      # Correct:
+      spam(ham[1], {eggs: 2})
+      # Wrong:
+      spam( ham[ 1 ], { eggs: 2 } )
+      ________________________________________
+
+      在尾随逗号和后面的右括号之间：
+      ________________________________________
+      # Correct:
+      foo = (0,)
+      # Wrong:
+      bar = (0, )
+      ________________________________________
+
+      在逗号，分号或冒号之前：
+      ________________________________________
+      # Correct:
+      if x == 4: print x, y; x, y = y, x
+      # Wrong:
+      if x == 4 : print x , y ; x , y = y , x
+      ________________________________________
+
+      但是，在切片中，冒号的作用类似于二元运算符，并且在每一侧都应具有相等的数量（将其视为优先级最低的运算符）。
+      在扩展切片中，两个冒号必须应用相同的间距。例外：当省略slice参数时，将省略空格：
+      ________________________________________
+      # Correct:
+      ham[1:9], ham[1:9:3], ham[:9:3], ham[1::3], ham[1:9:]
+      ham[lower:upper], ham[lower:upper:], ham[lower::step]
+      ham[lower+offset : upper+offset]
+      ham[: upper_fn(x) : step_fn(x)], ham[:: step_fn(x)]
+      ham[lower + offset : upper + offset]
+      # Wrong:
+      ham[lower + offset:upper + offset]
+      ham[1: 9], ham[1 :9], ham[1:9 :3]
+      ham[lower : : upper]
+      ham[ : upper]
+      ________________________________________
+
+      紧接在包含函数调用的参数列表的开括号之前：
+      ________________________________________
+      # Correct:
+      spam(1)
+      # Wrong:
+      spam (1)
+      ________________________________________
+
+      紧接在切片或索引目的的开括号之前:
+      ________________________________________
+      # Correct:
+      dct['key'] = lst[index]
+      # Wrong:
+      dct ['key'] = lst [index]
+      ________________________________________
+
+      赋值（或其他）运算符周围使用多个空格以使其与另一个对齐:
+      ________________________________________
+      # Correct:
+      x = 1
+      y = 2
+      long_variable = 3
+      # Wrong:
+      x             = 1
+      y             = 2
+      long_variable = 3
+      ________________________________________
+  - 本章其他的建议
+    避免在任何地方拖尾空格。因为它通常是不可见的，所以可能会造成混淆：
+    例如，反斜杠后跟一个空格和一个换行符的情况不算作行继续的标记。一些编辑器遇到这种情况不会有提示，但许多项目（例如CPython本身）都有拒绝这种情况的预提交钩子。
+
+    始终在两侧用单个空格将这些二元运算符括起来：赋值(=)，扩展赋值(+=, -= 等.)，比较 (==, <, >, !=, <>, <=, >=, in, not in, is, is not)，布尔值(and, or, not).
+
+    如果使用优先级不同的运算符，请考虑在优先级最低的运算符周围添加空格。具体情况您可以自己判断；但是，永远不要使用一个以上的空格，并在二元运算符的两边总保持相同数量的空格：
+    ________________________________________
+    # Correct:
+    i = i + 1
+    submitted += 1
+    x = x*2 - 1
+    hypot2 = x*x + y*y
+    c = (a+b) * (a-b)
+
+    # Wrong:
+    i=i+1
+    submitted +=1
+    x = x * 2 - 1
+    hypot2 = x * x + y * y
+    c = (a + b) * (a - b)
+    ________________________________________
+    
+    函数注释应使用冒号的常规规则，并且-箭头周围始终有空格（如果出现）。（有关函数注释的更多信息，请参见下面章节的函数注释。）：
+    ________________________________________
+    # Correct:
+    def munge(input: AnyStr): ...
+    def munge() -> PosInt: ...
+    # Wrong:
+    def munge(input:AnyStr): ...
+    def munge()->PosInt: ...
+    ________________________________________
+
+    当用于指示关键字参数或用于指示未注释的函数参数的默认值时，请勿在=周围使用空格：
+    ________________________________________
+    # Correct:
+    def complex(real, imag=0.0):
+        return magic(r=real, i=imag)
+
+    # Wrong:
+    def complex(real, imag = 0.0):
+        return magic(r = real, i = imag)
+    ________________________________________
+    
+    但是，当将参数注释与默认值组合时，请在=符号周围使用空格：
+    ________________________________________
+    # Correct:
+    def munge(sep: AnyStr = None): ...
+    def munge(input: AnyStr, sep: AnyStr = None, limit=1000): ...
+    # Wrong:
+    def munge(input: AnyStr=None): ...
+    def munge(input: AnyStr, limit = 1000): ...
+    ________________________________________
+
+    通常不建议使用复合语句（同一行上的多个语句）：
+    ________________________________________
+    # Correct:
+    if foo == 'blah':
+        do_blah_thing()
+    do_one()
+    do_two()
+    do_three()
+
+    # Wrong:
+    if foo == 'blah': do_blah_thing()
+    do_one(); do_two(); do_three()
+    ________________________________________
+
+    虽然有时可以将if / for / while的小主体放在同一行上是可以的，但对于多子句语句则永远不要这样做。也要避免折叠这么长的线！
+    ________________________________________
+    # Wrong:
+    if foo == 'blah': do_blah_thing()
+    for x in lst: total += x
+    while t < 10: t = delay()
+
+    # Definitely Wrong:
+    if foo == 'blah': do_blah_thing()
+    else: do_non_blah_thing()
+
+    try: something()
+    finally: cleanup()
+
+    do_one(); do_two(); do_three(long, argument,
+                                list, like, this)
+
+    if foo == 'blah': one(); two(); three()
+    ________________________________________
+
+
+
+
+-------------------
+* When to Use Trailing Commas 什么时候在行尾使用逗号
+  尾部的逗号通常是可选的，但当组成一个元素的元组时它们是必需的（并且在Python 2中，它们具有print语句的语义）。
+  为了清楚起见，建议将后者用（技术上多余的）括号括起来：
+  ________________________________________
+  # Correct:
+  FILES = ('setup.cfg',)
+  # Wrong:
+  FILES = 'setup.cfg',
+  ________________________________________
+  如果结尾的逗号多余，则在使用版本控制系统时，当值，参数或导入项的列表预计会随着时间扩展时，它们通常会很有用。
+  这种模式特征(patterns)是将每个值（或者参数等等）单独放在一行上，始终添加尾随逗号，并在下一行上添加右括号/括号/括号。
+  但是，在与结束定界符相同的行上使用尾随逗号是没有意义的（在上述单例元组的情况下除外）：
+  ________________________________________
+  # Correct:
+  FILES = [
+      'setup.cfg',
+      'tox.ini',
+      ]
+  initialize(FILES,
+            error=True,
+            )
+  # Wrong:
+  FILES = ['setup.cfg', 'tox.ini',]
+  initialize(FILES, error=True,)
+  ________________________________________
+
+
+
+
+-------------------
+* Comments  注释
+  与代码矛盾的注释比没有注释更糟糕。当代码更改时，要始终更新注释！
+
+  注释应为完整的句子。第一个单词应大写，除非它是一个以小写字母开头的标识符（请勿更改标识符的大小写！）。
+
+  注释块通常是由一个或多个完整句子组成的段落，每个句子以句点结尾。
+
+  在多句注释中，除了最后一个句子之外，您应该在句子结尾句后使用两个空格。
+
+  确保您的注释清晰明了，并且其他的 使用注释语言作为母语 的使用者也很容易理解。
+
+  来自非英语国家的Python编码人员：请用英语写您的注释，除非您有120％的把握确保不会说这种语言的人不会阅读该代码。
+  - 块注释（通常注释）
+    块注释通常适用于其后的一些（或全部）代码，并且缩进到与该代码相同的级别。块注释的每一行都以＃和一个空格开头（除非注释内的文本是缩进的）。
+
+    块注释中的段落由包含单个＃的行分隔。
+  
+  - 内联注释
+    谨慎使用内联注释。
+
+    内联注释是与语句在同一行上的注释。内联注释应与该语句至少分隔两个空格。它们应以＃和单个空格开头。
+
+    内联注释是不必要的，并且如果它们表明显而易见，则实际上会分散注意力。不要这样做：
+    ________________________________________
+    x = x + 1                 # x在增大
+    ________________________________________
+    But sometimes, this is useful:
+    ________________________________________
+    x = x + 1                 # 边界的补偿
+    ________________________________________
+
+  - 文档字符串
+    在PEP 257中，编写好的文档字符串（也称为“文档字符串”）的约定将名垂千古。
+
+    所有公共模块，函数，类和方法，都应该为其编写文档字符串。对于非公共方法，文档字符串不是必需的，但是您应该具有描述该方法功能的注释。该注释应出现在def行之后。
+
+    PEP 257描述了良好的文档字符串约定。请注意，最重要的是，结束多行文档字符串的“”应单独位于一行上：
+    ________________________________________
+    """Return a foobang
+
+    Optional plotz says to frobnicate the bizbaz first.
+    """
+    ________________________________________
+    对于一行式文档字符串，结尾的"""应在同一行：
+    ________________________________________
+    """Return an ex-parrot."""
+    ________________________________________
+
+
+
+
+-------------------
+* Naming Conventions  命名方法
+Python库的命名约定有点混乱，因此我们永远都无法做到完全一致--尽管如此，这是当前推荐的命名标准。
+新模块和软件包（包括第三方框架）应遵循这些标准。但如果现有库具有不同样式，内部一致性是首选。
+  - 首要的命名原则
+    对于用户而言，作为API公共部分可见的名称的命名方法应反映它的用法而不是它如何实现。
+  
+  - 描述型的命名样式
+    现在有很多不同的命名样式。不讨论从函数的名字中是否能看出函数的用途是什么，人们总是可以准确说出它们正在使用的命名样式是什么。
+    下列是最通常使用的命名样式：
+      b (单个小写字母)
+
+      B (单个大写字母)
+
+      lowercase
+
+      lower_case_with_underscores (小写带下划线)
+
+      UPPERCASE
+
+      UPPER_CASE_WITH_UNDERSCORES (大写带下划线)
+
+      CapitalizedWords (驼峰命名 [4]， 有时也被称为 StudlyCaps).
+
+      注意：在CapWords中使用首字母缩写词时，请使用首字母缩写词的所有字母大写。因此，HTTPServerError比HttpServerError看起来更舒服，也更好。
+
+      mixedCase (与上文不同的是，首字母小写！)
+
+      Capitalized_Words_With_Underscores (丑得一批!)
+
+    还有一种使用短的唯一前缀将相关名称组合在一起的样式。这在Python中使用不多，但是为了完整起见也提一下：
+    例如，os.stat（）函数返回一个元组，该元组的项目传统上具有诸如st_mode， st_size，st_mtime等名称。
+      （这样做是为了强调与POSIX系统调用结构的字段的对应关系，这有助于程序员熟悉该结构。）
+
+    X11库将前导X用于其所有公共功能。在Python中，这种样式通常被认为是不必要的，因为属性和方法名称以对象为前缀，函数名称以模块名作为前缀。
+
+    此外，还可以识别出以下使用前划线或后划线的特殊形式（通常可以将它们与任何大小写的惯例结合使用）：
+      _single_leading_underscore：“内部使用”, 级别较弱。例如，from M import * 不会导入名称以下划线开头的对象。
+
+      single_trailing_underscore_：约定用于避免与Python关键字冲突，例如
+      ________________________________________
+      tkinter.Toplevel（master，class_ ='ClassName'）
+      ________________________________________
+
+      __double_leading_underscore：命名类属性时，调用此名称修饰（在类FooBar中，__boo变为 _FooBar__boo；请参见下文）。
+
+      __double_leading_and_trailing_underscore__：位于用户控制的名称空间中的“魔法”对象或属性。
+        例如__init__, __import__ 或者 __file__请勿发明此类名称；仅按文档使用它们。
+  
+  - 惯例上的命名约定
+    - 需要避免的名字
+      切勿将字符“l”（小写字母L），“O”（大写字母o）或“ I”（大写字母i）用作单个字符变量名称。
+
+      在某些字体中，这些字符与数字1和0没有区别。当你尝试用“l”时，请改用“ L”。
+    
+    - ASCII 兼容性
+      标准库中使用的标识符必须与PEP 3131的 policy section 所述的ASCII兼容 。
+
+    - 包和模块名
+      模块应使用简短的全小写名称。如果模块名称可以提高可读性，则可以在模块名称中使用下划线。尽管不鼓励使用下划线，但Python软件包也应使用短小写全名。
+
+      当用C或C++编写的扩展模块具有随附的Python模块提供更高级别（例如，更面向对象）的接口时，这个C/C++模块应有下划线（例如_socket）。
+
+    - 类名
+      类名通常应使用CapWords约定样式。
+
+      只有在接口的实现被封存不可改并且主要用法是调用的情况下，可以作为代替使用函数的命名约定。
+
+      请注意，内置名称有一个单独的样式约定：大多数内置名称是单个单词（或两个单词），而CapWords约定仅用于异常名称和内置常量。
+
+    - 类型变量名
+      在PEP 484中引入的类型变量的名称通常应使用CapWords的短名称样式，如T，AnyStr，Num。
+      建议将用于声明协变或逆变行为的变量后缀分别添加_co或_contra：
+      ________________________________________
+      from typing import TypeVar
+
+      VT_co = TypeVar('VT_co', covariant=True)
+      KT_contra = TypeVar('KT_contra', contravariant=True)
+      ________________________________________
+    
+    - “异常”名
+      因为异常应该是类，所以在这里适用类命名约定样式。但是，您应该在异常名称上使用后缀“ Error”（如果异常实际上是一个错误）。
+
+    - 全局变量名
+      （我们希望这些变量只能在一个模块内使用。）
+      全局变量名的约定样式与函数的约定大致相同。
+
+      设计用于通过M import *使用的模块应使用__all__机制以防止导出全局变量，或使用较早的样式比如在此类全局变量名前加下划线。
+
+    - 函数和变量名
+      函数名称应小写，必要时用下划线分隔单词，以提高可读性。
+
+      变量名与函数名遵循相同的约定。
+
+      仅在已经是主流样式（例如threading.py）的上下文中才允许使用mixedCase，以保持向后兼容性。
+    
+    - 函数和方法的参数名
+      始终将self作为实例方法的第一个参数。
+
+      始终对类方法的第一个参数使用cls。
+
+      如果函数参数的名称与保留关键字发生冲突，通常最好在末尾附加一个下划线，而不要使用缩写或拼写错误。因此，class_优于clss。（也许更好的办法是使用同义词来避免此类冲突。）
+
+    - 方法名和变量实例
+      使用函数命名规则：小写字母，必要时用下划线分隔单词，以提高可读性。
+
+      仅对非公共方法和实例变量使用一个前划线。
+
+      为避免名称与子类冲突，请使用两个前导下划线来调用Python的名称处理规则。
+
+      Python用类名来修饰这些名称：如果类Foo具有名为__a的属性，则Foo.__ a不能访问它。（坚持的用户仍然可以通过调用Foo._Foo__a来获得访问权限。）
+        通常，双引号下划线仅应用于避免名称与设计为子类的类中的属性发生冲突。
+
+      注意：关于__name的使用存在一些争议（请参见下文）。
+
+    - 常数
+      常量通常在模块级别定义，并以所有大写字母书写，并用下划线分隔单词。示例包括 MAX_OVERFLOW和TOTAL。
+
+    - 继承设计的命名方法
+      始终确定类的方法和实例变量（统称为“属性”）应该是公共的还是非公共的。如果你也不确定，请选择非公开；因为稍后将其公开比将公共属性设为不公开要容易。
+
+      公共属性是您希望与类无关的clients使用的属性，并且你需要承诺避免向后不兼容的更改。
+      非公共属性是指不打算由第三方使用的属性；您不保证非公共属性不会更改甚至被删除。
+
+      我们在这里不使用术语“私有”，因为在Python中没有任何属性是真正私有的。
+
+      另一类属性是属于“subclass API”（在其他语言中通常称为“protected”）的那些属性。某些类被设计为可继承的，以扩展或修改类行为的各个方面。
+        在设计这样的类时，请务必明确决定哪些属性是公共属性，哪些是子类API的一部分，哪些属性仅真正由您的基类使用。
+
+      考虑到这一点，以下是Python准则：
+        公共属性不应包含前导下划线。
+
+        如果您的公共属性名称与保留关键字冲突，请在属性名称后附加一个下划线。这优于缩写或拼写错误。
+          （但是，尽管有此规则，对于任何已知是类的变量或参数，尤其是类方法的第一个参数，“ cls”是首选的拼写。）
+
+        注意1：有关类方法，请参见上面的参数名称建议。
+
+        对于简单的公共数据属性，最好仅公开属性名称，而不使用复杂的访问器/更改器方法。
+          请记住，如果您发现简单的数据属性需要增强功能行为，那么Python为将来的增强提供了一条简便的途径。
+            在这种情况下，请使用属性将功能实现隐藏在简单的数据属性访问语法之后。
+
+          注1：属性仅适用于新型类。
+
+          注2：尽管通常不会出现诸如缓存之类的副作用，但是请尽量使功能行为没有副作用。
+
+          注3：避免将属性用于高计算量的操作；属性符号往往使调用者认为访问（相对）比较轻量。
+
+        如果您的类打算被子类化，并且您具有不想使用子类的属性，请考虑使用双引号和下划线来命名它们。这将调用Python的名称修改算法，其中将类的名称添加到属性名称里。
+          这有助于避免属性名称冲突，如果子类无意中包含相同名称的属性。
+
+          注1：请注意，在严重压缩的名称中只使用简单的类名。因此，如果子类同时选择了相同的类名和属性名，则仍会发生名称冲突。
+
+          注2：名称修饰可以使某些用途（例如调试和 __getattr__())）不那么方便。但是，名称修饰算法已被很好的文档化，并且易于手动执行。
+
+          注3：并非每个人都喜欢名称修饰。尝试在避免意外名称冲突与潜在的高级调用之间进行权衡。
+    
+    - 公共和内部接口名
+      你只需要保证公共接口具有向后兼容性。因此，重要的是用户能够清楚地区分公共接口和内部接口。
+
+      已经文档化(Documented)的接口都应被视为公共接口，除非文档明确声明它们是临时接口或内部接口，而这两种接口不受通常的向后兼容性保证。
+        否则。所有未记录的接口都应假定为内部接口。
+
+      为了更方便自我检查，模块应使用__all__属性在其公共API中显式声明名称。将__all__设置为空时，表示该模块没有公共API。
+
+      即使适当地设置了__all__，内部接口（包，模块，类，函数，属性或其他名称）仍应使用单个下划线作为前缀。
+
+      对于任何的接口，当它包含名称空间（包，模块或类），则该接口也被视为内部接口。
+
+      作为import的名称，应始终以实现的细节为命名尺度。除非其他模块是被包含模块的API中明确文档化的一部分，否则其他模块不得依赖对此类导入名称的间接访问
+        例如os.path或某个包从子模块中用于体现功能的__init__模块。
+
+
+
+
+-------------------
+* Programming Recommendations 编程建议
+  应该以不妨碍Python其他实现（PyPy，Jython，IronPython，Cython，Psyco等）执行的方式编写代码。
+    例如，对于形式为 a += b 或 a = a + b的语句，请不要依赖CPython对原位字符串连接的有效实现。
+      即使在CPython中，这种优化也很脆弱（仅适用于某些类型），并且在不使用引用计数的实现中根本不存在这种优化。
+      在库的性能敏感部分中，应改用''.join（）形式。这将确保在各种实现中串联行为都发生在线性时间内。
+
+  与单例（如None）的比较应该始终使用 is 或 is not进行，永远不要使用相等==运算符进行。
+    另外，当您要表示if x is not None时，要当心写 if x，例如，在测试默认为None的变量或参数是否为其他值时，这个其他值可能会返回布尔false的类型（例如容器）！
+
+  使用is not运算符，而不是 not ... is 。虽然两个表达式在功能上都相同，但前者更为首选和易读：
+  ________________________________________
+  # Correct:
+  if foo is not None:
+
+  # Wrong:
+  if not foo is None:
+  ________________________________________
+  
+  当编写基于富比较（即Python特有的高级比较，允许解决较为复杂的问题。如x<y，而x和y是高级数据结构）的排序操作，最好是实现所有六个操作：
+  (__eq__, __ne__, __lt__, __le__, __gt__, __ge__)
+  而不是依靠其他代码，只编写特定的某几个比较。
+  为了最大程度地减少工作量， functools.total_ordering() 装饰器提供了一种生成缺少的比较方法的工具。
+
+  PEP 207表明，交换律的规则是在python中默认假设存在的。因此，解释器可以将y > x与x < y交换，y >= x 与x <= y交换，并且可以交换x == y和x！= y的参数。
+  sort()和min()操作是被保证基于<运算符的，同时max()函数使用>运算符。但是，最好写完整所有六个操作，以避免混淆。
+
+  始终使用def语句而不是将lambda表达式直接绑定到标识符的赋值语句
+  ________________________________________
+  # Correct:
+  def f(x): return 2*x
+
+  # Wrong:
+  f = lambda x: 2*x
+  ________________________________________
+
+  上面第一种形式的意思是用'f'而不是'lambda'作函数的名字，总的来说，这种命名方式更有利于traceback回溯，也具有更美观的表示形式，
+    在def里使用赋值语句消除了lambda表达式相对于显式def语句提供的唯一好处（即，可以将其嵌入较大的表达式中）。
+  第一种形式表示结果函数对象的名称专门为“ f”，而不是通用的“ <lambda>”。通常，这对于回溯和字符串表示形式更为有用。
+  使用赋值语句消除了lambda表达式相对于显式def语句（即，可以将其嵌入较大的表达式中）提供的唯一好处。
+
+  从Exception而不是BaseException派生异常。从BaseException直接继承的异常通常是不应该被捕获的异常。
+
+  基于可能需要捕获异常的代码的意义区别来设计异常层次结构 ，而不是根据引发异常的位置进行设计。异常旨在回答“出了什么问题？”的问题。
+    而不是仅声明“发生了问题”（有关内置异常层次结构的示例，请参阅PEP 3151）
+
+  异常的名字可以使用类命名的样式指南，但如果异常是错误，则应在异常类中添加后缀“ Error”。用于非本地流控制的或其他形式的信令的非错误异常不需要特殊的后缀。
+
+  适当使用异常链接。在Python 3中，应使用“raise X from Y”来表示显式替换而不会丢失原始的问题回溯。
+
+  故意替换内部异常时（在Python 2中使用“raise X”或在Python 3.3+中使用“raise X from None”），请确保将相关详细信息转移到新的异常
+    （例如在将KeyError转换为AttributeError时保留属性名称） ，或将原始异常的文本嵌入新的异常消息中。
+
+  在Python 2中引发异常时，请使用raise ValueError('message') 而不是较旧的形式raise ValueError。后一种形式不是合法的Python 3语法。
+
+  使用括号的形式还意味着，当异常参数很长或包含字符串格式时，由于包含括号，您不需要使用行继续符。
+
+  捕获异常时，请尽可能提及特定的异常，而不要使用空壳的except: clause:
+  ________________________________________
+  try:
+      import platform_specific_module
+  except ImportError:
+      platform_specific_module = None
+  ________________________________________
+
+  一个'空壳异常'通常是：clause通常会捕捉一个SystemExit和一个KeyboardInterrupt异常，使其更难通过Ctrl-C中断，并且会掩盖掉其他问题。
+    如果要捕获所有表明程序错误的异常，请使用 except Exception:（一个空壳的异常等效于except BaseException:）。
+
+  一个好的经验法则是将空壳异常子句的使用限制为两种情况：
+
+  如果异常处理程序将打印输出或记录回溯；这意味着至少用户会意识到发生了错误。
+  如果代码需要做一些清理工作，但是让异常通过 raise. try...finally 向上传播，可能是处理这种情况的更好方法。
+  在将捕获的异常绑定到名称里时，最好使用Python 2.6中添加的显式名称绑定语法：
+  ________________________________________
+  try:
+      process_data()
+  except Exception as exc:
+      raise DataProcessingFailedError(str(exc))
+  ________________________________________
+  这是Python 3中唯一支持的语法，并且避免了与较早的基于逗号的语法相关的歧义问题。
+
+  捕获操作系统错误时，最好使用Python 3.3中引入的显式异常层次结构，而不是对errno值的自省。
+    关于自省：内省，有时也叫类型内省，是在运行时进行的一种对象检测机制。
+            我们可以通过内省来获取一个对象的所有信息，比如这个对象的类型，其中包含哪些属性等等。
+    关于反射：与内省相比，反射的功能要显得更为强大。反射使得程序具有在运行时动态修改自己的结构和行为的能力
+  
+  此外，对于所有try / except子句，请将try子句限制为所需的绝对最小数量的代码。同样，这避免了掩盖错误：
+  ________________________________________
+  # Correct:
+  try:
+      value = collection[key]
+  except KeyError:
+      return key_not_found(key)
+  else:
+      return handle_value(value)
+  # Wrong:
+  try:
+      # Too broad!
+      return handle_value(collection[key])
+  except KeyError:
+      # Will also catch KeyError raised by handle_value()
+      return key_not_found(key)
+  ________________________________________
+
+  当资源位于本地(对某段代码来说）时，请使用 with语句以确保在使用后迅速，可靠地对其进行清理。try / finally语句也是可以接受的。
+
+  每当他们执行除获取和释放资源以外的其他操作时，都应通过单独的函数或方法来调用上下文管理器：
+  ________________________________________
+  # Correct:
+  with conn.begin_transaction():
+      do_stuff_in_transaction(conn)
+  # Wrong:
+  with conn:
+      do_stuff_in_transaction(conn)
+  ________________________________________
+
+  错误的示例除了在transaction后关闭了链接，并没有提供任何信息来指定__enter__和__exit__方法在做什么。明确的给出这类信息在这种情形下很关键。
+
+  在return语句中，风格应保持一致。函数中的所有return语句应该返回一个表达式，或者都不返回。
+    如果任何return语句返回一个表达式，则不返回任何值的任何return语句都应将其显式声明为return None，并且在函数末尾（如果可以执行到）应存在一个显式return语句：
+  ________________________________________
+  # Correct:
+
+    def foo(x):
+        if x >= 0:
+            return math.sqrt(x)
+        else:
+            return None
+
+    def bar(x):
+        if x < 0:
+            return None
+        return math.sqrt(x)
+    # Wrong:
+
+    def foo(x):
+        if x >= 0:
+            return math.sqrt(x)
+
+    def bar(x):
+        if x < 0:
+            return
+        return math.sqrt(x)
+  ________________________________________
+
+  使用字符串方法而不是字符串模块。
+
+  字符串方法总是更快，并且与unicode字符串共享相同的API。如果需要与2.0之前的Python向后兼容，请忽略此规则。
+
+  使用''.startswith()和''.endswith()而不是字符串切片来检查前缀或后缀。
+
+  startswith()和endswith()更干净，更不容易出错：
+  ________________________________________
+  # Correct:
+  if foo.startswith('bar'):
+  # Wrong:
+  if foo[:3] == 'bar':
+  ________________________________________
+
+  对象类型比较应始终使用isinstance()而不是直接比较类型：
+  ________________________________________
+  # Correct:
+  if isinstance(obj, int):
+  # Wrong:
+  if type(obj) is type(1):
+  ________________________________________
+
+  在检查对象是否为字符串时，请记住它也可能是unicode字符串！在Python 2中，str和unicode有一个通用的基类basestring，因此您可以执行以下操作：
+  ________________________________________
+  if isinstance(obj, basestring):
+  ________________________________________
+
+  请注意，在Python 3中，unicode和basestring不再存在（只有str），bytes对象不再是一种字符串（取而代之的是整数序列）。
+
+  对于序列（字符串，列表，元组），请在使用前假定空序列是否存在：
+  ________________________________________
+  # Correct:
+  if not seq:
+  if seq:
+  # Wrong:
+  if len(seq):
+  if not len(seq):
+  ________________________________________
+
+  不要写依赖大量尾随空格的字符串文字。这种尾随的空格在视觉上是无法区分的，因此一些编辑器（或最近的，reindent.py）会对其进行修剪。
+
+  不要使用==将布尔值与True或False进行比较。
+
+  ________________________________________
+  # Correct:
+  if greeting:
+  # Wrong:
+  if greeting == True:
+  # Worse:
+  if greeting is True:
+  ________________________________________
+
+  不鼓励在try...finally的finally套件内使用流控制语句 return/break/continue ，流控制语句将跳到finally套件之外。
+    这是因为这样的语句将隐式取消通过finally套件传播的任何活动异常：
+  ________________________________________
+  # Wrong:
+  def foo():
+      try:
+          1 / 0
+      finally:
+          return 42
+  ________________________________________
+
+  - 函数注释
+    随着PEP 484的接受，函数注释的样式规则正在改变。
+
+    为了向前兼容，Python 3代码中的函数注释最好应使用PEP 484语法。（上一部分中对注释有一些格式建议。）
+
+    不再鼓励使用本PEP中先前建议的注释样式进行实验。
+
+    但是，在stdlib之外， 现在鼓励在PEP 484规则之内进行实验。
+      例如，使用PEP 484样式类型注释为大型第三方库或应用程序标记，你需要关注添加这些注释的难易程度，并观察它们的存在是否增加了代码的可理解性。
+
+    Python标准库在采用此类注释时应保持保守，但允许将其用于新代码和大型重构。
+
+    对于想要不同使用函数注释的代码，建议添加以下形式的注释：
+      # type: ignore
+    在文件顶部附近；这告诉类型检查器忽略所有注释。（在PEP 484中可以找到更多的防止类型检查报问题的更细粒的方法。）
+
+    像linter一样，类型检查器是可选的独立工具。默认情况下，Python解释器不应由于类型检查而输出任何消息，也不应基于注释更改其行为。
+
+    不想使用类型检查器的用户可以随意忽略它们。但是，第三方库软件包的用户可能希望对那些软件包运行类型检查器。
+      为此， PEP 484建议使用存根文件：类型检查器优先于相应的.py文件读取的.pyi文件。
+      存根文件可以与库一起分发，也可以通过typeshed repo[5]单独分发（在库作者的允许下）。
+
+    对于需要向后兼容的代码，可以以注释的形式添加类型注释。参见PEP 484 [6]的相关部分 。
+
+
+  - 可变注释
+    PEP 526引入了可变注释。针对它们的样式建议与上述函数注释类似：
+
+    模块级变量，类和实例变量以及局部变量的注释应在冒号后面有一个空格。
+
+    冒号前不应有空格。
+
+    如果一个赋值语句有右边部分，则其两边的空格数应该是相同的。
+    ________________________________________
+    # Correct:
+
+    code: int
+
+    class Point:
+        coords: Tuple[int, int]
+        label: str = '<unknown>'
+    # Wrong:
+
+    code:int  # No space after colon
+    code : int  # Space before colon
+
+    class Test:
+        result: int=0  # No spaces around equality sign
+    ________________________________________
+
+    尽管PEP 526已被Python 3.6接受，但可变注释语法是所有版本的Python上存根文件的首选语法（有关详细信息，请参阅PEP 484）。
+
+    脚注：
+
+    [7]	悬挂缩进是一种类型设置样式，其中段落中除第一行外的所有行均缩进。
+      在Python上下文中，该术语用于描述一种样式，其中带括号的语句的左括号是该行的最后一个非空白字符，其后的行会缩进，直到右括号为止。
+
+
+
+
+-------------------
+References  引用
+[1]	PEP 7, Style Guide for C Code, van Rossum
+[2]	Barry's GNU Mailman style guide http://barry.warsaw.us/software/STYLEGUIDE.txt
+[3]	Donald Knuth's The TeXBook, pages 195 and 196.
+[4]	http://www.wikipedia.com/wiki/CamelCase
+[5]	Typeshed repo https://github.com/python/typeshed
+[6]	Suggested syntax for Python 2.7 and straddling code 
+    https://www.python.org/dev/peps/pep-0484/#suggested-syntax-for-python-2-7-and-straddling-code
+
+
+
+
+-------------------
+* Copyright 版权
+该文档已放置在公共领域。
+
+来源：https://github.com/python/peps/blob/master/pep-0008.txt
+
+
+
+-------------------
+The Zen of Python, by Tim Peters
+
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren't special enough to break the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+There should be one-- and preferably only one --obvious way to do it.
+Although that way may not be obvious at first unless you're Dutch.
+Now is better than never.
+Although never is often better than *right* now.
+If the implementation is hard to explain, it's a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea -- let's do more of those!
