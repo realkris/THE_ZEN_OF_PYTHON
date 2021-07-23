@@ -9,7 +9,7 @@ Source:   https://www.python.org/dev/peps/pep-0008/
 Translate:
   realkris Zhang <ZPRC@Hotmail.com>
   Date:     16-Dec-2020
-  Version:  0.1
+  Version:  1.0
   Annotations:
     这是一篇对PEP-8官方指南的翻译，译者在日常工作中频繁的使用Python，并在近日通过了99分的托福（折IELTS 7.0）。
     为了提高代码的易读性，提高代码工程性和减少垃圾，在Sherk Fung的影响下决定仔细阅读PEP-8。并在阅读过程中顺便编写了这份译文，为了深入理解，部分节段可能包含对其他文档的引用。
