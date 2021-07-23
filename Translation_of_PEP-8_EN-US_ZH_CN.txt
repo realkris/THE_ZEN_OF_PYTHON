@@ -8,7 +8,7 @@ Source:   https://www.python.org/dev/peps/pep-0008/
 
 Translate:
   realkris Zhang <ZPRC@Hotmail.com>
-  Date:     16-Dec-2020
+  Date:     23-Jul-2021
   Version:  1.0
   Annotations:
     这是一篇对PEP-8官方指南的翻译，译者在日常工作中频繁的使用Python，并在近日通过了99分的托福（折IELTS 7.0）。
